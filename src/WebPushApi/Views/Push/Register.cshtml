@@ -8,6 +8,10 @@
     <button id="start-subscribe">Subscribeの登録</button>
 </p>
 
+<p>
+    <button id="stop-service-worker">ServiceWorkerの削除</button>
+</p>
+
 <p>Subscribeの登録が失敗する場合はブラウザの開発ツールよりサイトデータの削除を行う</p>
 
 
@@ -31,6 +35,7 @@
       ev.preventDefault();
       window.navigator.serviceWorker.register("/js/service-worker.js").then(registration => {
         console.log("Register OK:", registration);
+        btnRegister.innerHTML += " 済み";
         _registration = registration;
       }).catch(err => {
         console.log("Register Error:", err);
@@ -45,6 +50,7 @@
             applicationServerKey: urlB64ToUint8Array("@Model.PublicKey"),
         }).then(subscription => {
             console.log("Subscribe OK:", subscription);
+            btnSubscribe.innerHTML += " 済み";
             return fetch("/push/subscribe", {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
@@ -57,5 +63,22 @@
             console.error("[main.js][Subscription]", err);
         });
     });
+
+    const btnUnregister = document.querySelector("button#stop-service-worker");
+    btnUnregister.addEventListener("click", ev => {
+        ev.preventDefault();
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                //returns installed service workers
+                if (registrations.length) {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                }
+            });
+        }
+        btnUnregister.innerHTML += " 済み";
+    });
+
 </script>
 }
